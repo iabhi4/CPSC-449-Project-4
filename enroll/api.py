@@ -12,7 +12,7 @@ from boto3.dynamodb.conditions import Key, Attr
 KRAKEND_PORT = "5400"
 
 # start dynamo db
-dynamo_db = boto3.resource('dynamodb', endpoint_url="http://localhost:5500")
+dynamo_db = boto3.resource('dynamodb', endpoint_url="http://localhost:5500", region_name="localhost")
 # retrieve tables
 users_table = dynamo_db.Table('Users')
 classes_table = dynamo_db.Table('Classes')
