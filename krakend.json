@@ -29,7 +29,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Student"],
+                        "roles": ["Student", "student"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -60,7 +60,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Student"],
+                        "roles": ["Student","student"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -91,7 +91,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Student"],
+                        "roles": ["Student", "student"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -122,7 +122,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Student"],
+                        "roles": ["Student", "student"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -153,7 +153,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Student"],
+                        "roles": ["Student", "student"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -184,7 +184,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Instructor"],
+                        "roles": ["Instructor", "instructor"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -215,7 +215,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Instructor"],
+                        "roles": ["Instructor", "instructor"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -246,7 +246,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Instructor"],
+                        "roles": ["Instructor", "instructor"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -277,7 +277,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Instructor"],
+                        "roles": ["Instructor", "instructor"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -308,7 +308,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Registrar"],
+                        "roles": ["Registrar", "registrar"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -342,7 +342,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Registrar"],
+                        "roles": ["Registrar", "registrar"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -373,7 +373,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Registrar"],
+                        "roles": ["Registrar","registrar"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
@@ -404,7 +404,7 @@
                 "extra_config": {
                     "auth/validator": {
                         "alg": "RS256",
-                        "roles": ["Registrar"],
+                        "roles": ["Registrar","registrar"],
                         "jwk_local_path": "./etc/public.json",
                         "disable_jwk_security": true,
                         "operation_debug": true
