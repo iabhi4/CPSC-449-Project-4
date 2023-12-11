@@ -124,7 +124,7 @@ def register_user(user_data: User, db_read: sqlite3.Connection = Depends(get_db_
 
     for role in roles:
         db_write.execute(f"INSERT INTO Roles (Rolename) VALUES (?)", (role,))
-        role_id = db_read.execute("SELECT RoleId from Roles ORDER BY RoleId DESC LIMIT 1").fetchone()[0]
+        role_id = db_read.execute("SELECT RoleId from Roles WHERE RoleName = (?) LIMIT 1", (role,)).fetchone()[0]
         db_write.execute("INSERT INTO UserRoles (RoleId, UserId) VALUES (?, ?)", (role_id, user_id))
     db_write.commit()
     return {"status" : "200 OK","message": f"User {username} successfully registered with role {roles}."}
