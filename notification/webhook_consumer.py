@@ -7,7 +7,6 @@ from fastapi import Depends, FastAPI, HTTPException
 def send_webhook(proxyURL, body):
     try:
         url = unquote(proxyURL)
-        r = httpx.get(url)
         r = httpx.post(url, data={'message': body})
         if r.status_code == 200:
             print('Webhook message sent')
@@ -41,10 +40,15 @@ def webhook_notification_consumer():
         print(' [*] Waiting for webhook notifications')
 
         def callback(ch, method, properties, body):
-            body_dict = json.loads(body.decode('utf-8'))
-            proxyURL = body_dict.get("proxyURL")
-            message = body_dict.get("message")
-            send_webhook(proxyURL, message)
+            try:
+                body_dict = json.loads(body.decode('utf-8'))
+                proxyURL = body_dict.get("proxyURL")
+                message = body_dict.get("message")
+                send_webhook(proxyURL, message)
+            except Exception as e:
+                print(f"Error processing webhook message: {e}")
+            finally:
+                ch.basic_ack(delivery_tag=method.delivery_tag)
         channel.basic_consume(queue=queue_name, on_message_callback=callback)
         channel.start_consuming()
 
