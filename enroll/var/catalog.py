@@ -81,7 +81,7 @@ class Catalog:
         
 
 # start an instance of the Catalog class
-dynamo_db = boto3.resource("dynamodb", endpoint_url = "http://localhost:5500")  
+dynamo_db = boto3.resource("dynamodb", endpoint_url = "http://localhost:5500", region_name="localhost")  
 my_catalog = Catalog(dynamo_db)  
 
 # ********************************** Delete tables if they exist **********************************
@@ -263,10 +263,10 @@ my_catalog.put_items("Users", users_items)
 
 # Populate the "Classes" table
 classes_items = [
-    {"ClassID": 1, "SectionNumber": 1, "CourseCode": "CS-101", "ClassName": "Introduction to Computer Science", "Department": "Computer Science", "InstructorID": 11, "MaxCapacity": 50, "CurrentEnrollment": 1, "CurrentWaitlist": 0, "State": "inactive", "WaitlistMaximum": 30},
-    {"ClassID": 2, "SectionNumber": 2, "CourseCode": "CS-101", "ClassName": "Introduction to Computer Science", "Department": "Computer Science", "InstructorID": 11, "MaxCapacity": 50, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "active", "WaitlistMaximum": 30},
+    {"ClassID": 1, "SectionNumber": 1, "CourseCode": "CS-101", "ClassName": "Introduction to Computer Science", "Department": "Computer Science", "InstructorID": 11, "MaxCapacity": 50, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "inactive", "WaitlistMaximum": 30},
+    {"ClassID": 2, "SectionNumber": 2, "CourseCode": "CS-101", "ClassName": "Introduction to Computer Science", "Department": "Computer Science", "InstructorID": 11, "MaxCapacity": 3, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "active", "WaitlistMaximum": 30},
     
-    {"ClassID": 3, "SectionNumber": 1, "CourseCode": "ENG-101", "ClassName": "English 101", "Department": "English", "InstructorID": 11, "MaxCapacity": 30, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "inactive", "WaitlistMaximum": 30},
+    {"ClassID": 3, "SectionNumber": 1, "CourseCode": "ENG-101", "ClassName": "English 101", "Department": "English", "InstructorID": 11, "MaxCapacity": 30, "CurrentEnrollment": 1, "CurrentWaitlist": 0, "State": "inactive", "WaitlistMaximum": 30},
     {"ClassID": 4, "SectionNumber": 2, "CourseCode": "ENG-101", "ClassName": "English 101", "Department": "English", "InstructorID": 11, "MaxCapacity": 30, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "active", "WaitlistMaximum": 30},
     
     {"ClassID": 5, "SectionNumber": 1, "CourseCode": "MATH-101", "ClassName": "Mathematics 101", "Department": "Mathematics", "InstructorID": 11, "MaxCapacity": 40, "CurrentEnrollment": 0, "CurrentWaitlist": 0, "State": "inactive", "WaitlistMaximum": 30},
@@ -285,27 +285,8 @@ my_catalog.put_items("Classes", classes_items)
 # Populate the "Enrollments" table
 enrollments_items = [
     {"EnrollmentID": 1, "StudentID": 2, "ClassID": 1, "EnrollmentState": "DROPPED"},
-    {"EnrollmentID": 2, "StudentID": 2, "ClassID": 2, "EnrollmentState": "WAITLISTED"},
-    {"EnrollmentID": 3, "StudentID": 2, "ClassID": 3, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 4, "StudentID": 2, "ClassID": 4, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 5, "StudentID": 2, "ClassID": 5, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 6, "StudentID": 3, "ClassID": 6, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 8, "StudentID": 3, "ClassID": 2, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 9, "StudentID": 3, "ClassID": 3, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 10, "StudentID": 3, "ClassID": 4, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 11, "StudentID": 4, "ClassID": 5, "EnrollmentState": "ENROLLED"},
-    # ENROLLMENTS FOR TESTING CLASS ID 1 FOR INSTRUCTOR ID 11
-    {"EnrollmentID": 12, "StudentID": 1, "ClassID": 1, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 13, "StudentID": 3, "ClassID": 1, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 14, "StudentID": 4, "ClassID": 1, "EnrollmentState": "ENROLLED"},
-    # FOR TESTING CLADD ID 2 FOR INSTRUCTOR ID 
-    {"EnrollmentID": 15, "StudentID": 1, "ClassID": 2, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 16, "StudentID": 4, "ClassID": 2, "EnrollmentState": "ENROLLED"},
-    {"EnrollmentID": 17, "StudentID": 12, "ClassID": 2, "EnrollmentState": "ENROLLED"},
-    # FOR TESTING DROP
-    {"EnrollmentID": 18, "StudentID": 11, "ClassID": 1, "EnrollmentState": "ENROLLED"}
+    {"EnrollmentID": 3, "StudentID": 2, "ClassID": 3, "EnrollmentState": "ENROLLED"}
 
 ]
 
 my_catalog.put_items("Enrollments", enrollments_items)
-
