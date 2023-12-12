@@ -433,7 +433,8 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
         updated_status = update_enrollment_status(response, new_status)
         # Decrement the CurrentEnrollment for the class
         updated_current_enrollment = update_current_enrollment(classid, increment=False)
-        if updated_current_enrollment:
+        updated_current_enrollment_int = int(updated_current_enrollment)
+        if updated_current_enrollment_int:
             next_on_waitlist = r.lpop(f"waitClassID_{classid}")
             if next_on_waitlist is not None:
                 # Convert the retrieved string to an integer
