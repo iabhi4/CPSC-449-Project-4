@@ -5,7 +5,7 @@ import requests
 import redis
 import boto3
 
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from notification.email_consumer import publish_email_notification
 from notification.webhook_consumer import publish_webhook_notification
 from pydantic_settings import BaseSettings
@@ -518,7 +518,7 @@ def remove_student_from_waitlist(studentid: int, classid: int, username: str, em
     return {"Element removed": studentid}
 
 @app.get("/waitlist/{studentid}/{classid}/{username}/{email}")
-def view_waitlist_position(response: Response, studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
+def view_waitlist_position(request: Request, response: Response, studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
     """API to view a student's position on the waitlist.
 
     Args:
@@ -540,7 +540,6 @@ def view_waitlist_position(response: Response, studentid: int, classid: int, use
                         status_code=304,
                         detail="Resource not modified",
                 )
-                return
         else:
             now_gmt = time.gmtime()
             r.set(f"last-modified:{classid}", now_gmt.timestamp())
