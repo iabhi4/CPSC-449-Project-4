@@ -46,10 +46,15 @@ def email_notification_consumer():
         print(' [*] Waiting for email notifications')
 
         def callback(ch, method, properties, body):
-            body_dict = json.loads(body.decode('utf-8'))
-            studentEmail = body_dict.get("email")
-            message = body_dict.get("message")
-            send_email(studentEmail, message)
+            try:
+                body_dict = json.loads(body.decode('utf-8'))
+                studentEmail = body_dict.get("email")
+                message = body_dict.get("message")
+                send_email(studentEmail, message)
+            except Exception as e:
+                print(f"Error processing email message: {e}")
+            finally:
+                ch.basic_ack(delivery_tag=method.delivery_tag)
         channel.basic_consume(queue=queue_name, on_message_callback=callback)
         channel.start_consuming()
 
