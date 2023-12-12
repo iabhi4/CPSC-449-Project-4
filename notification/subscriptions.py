@@ -1,5 +1,6 @@
 import json
-from fastapi import Depends, FastAPI, HTTPException
+from urllib.parse import unquote
+from fastapi import Depends, FastAPI, HTTPException, Path
 import redis
 
 from enroll.api import check_class_exists, check_user
@@ -8,7 +9,7 @@ from enroll.api import check_class_exists, check_user
 app = FastAPI()
 
 def get_redis():
-    return redis.Redis(host="127.0.0.1", port=6379)
+    return redis.Redis(host="localhost", port=6379)
 
 @app.post("/subscribe/{studentid}/{classid}/{username}/{email}/{proxyURL}")
 def subscribe_to_notification(
@@ -16,7 +17,7 @@ def subscribe_to_notification(
     classid: int,
     username: str,
     email: str,
-    proxyURL: str = None,
+    proxyURL: str,
     r=Depends(get_redis)
 ):
     """API for students to subscribe to enrollment notifications.
@@ -28,24 +29,29 @@ def subscribe_to_notification(
     Returns:
         A json with a message indicating the student's subscription status.
     """
-    check_user(studentid, username, email)
-    class_item = check_class_exists(classid)
-    if class_item.get('State') != 'active':
-        raise HTTPException(
-            status_code=409,
-            detail=f"Class with ClassID {classid} is not active"
-        )
-    
-    subscriptionKey = f"subscription:{studentid}"
-    existingSubscriptions = r.get(subscriptionKey)
-    if not existingSubscriptions:
-        existingSubscriptions = {}
-    else:
-        existingSubscriptions = json.loads(existingSubscriptions)
-    existingSubscriptions[classid] = {"email": email, "proxy": proxyURL}
-    r.set(subscriptionKey, json.dumps(existingSubscriptions))
+    try:
+        check_user(studentid, username, email)
+        class_item = check_class_exists(classid)
+        if class_item.get('State') != 'active':
+            raise HTTPException(
+                status_code=409,
+                detail=f"Class with ClassID {classid} is not active"
+            )
 
-    return {"message": f"You have subscribed to {classid}'s notification"}
+        subscriptionKey = f"subscription:{studentid}"
+        existingSubscriptions = r.get(subscriptionKey)
+        if not existingSubscriptions:
+            existingSubscriptions = {}
+        else:
+            existingSubscriptions = json.loads(existingSubscriptions)
+        existingSubscriptions[str(classid)] = {"email": email, "proxy": proxyURL}
+        r.set(subscriptionKey, json.dumps(existingSubscriptions))
+
+        return {"message": f"You have subscribed to {classid}'s notification"}
+
+    except Exception as e:
+        return {"error": str(e)}
+
 
 
 @app.get("/subscribe/list/{studentid}")
@@ -94,13 +100,12 @@ async def unsubscribe_from_notification(
         )
     
     existingSubscriptions = json.loads(existingSubscriptions)
-    if classid not in existingSubscriptions:
+    if str(classid) not in existingSubscriptions:
         raise HTTPException(
             status_code=404,
             detail=f"Student with ID {studentid} is not subscribed to ClassID {classid}"
         )
-    print("existing" + existingSubscriptions)
-    del existingSubscriptions[classid]
+    del existingSubscriptions[str(classid)]
     r.set(subscriptionKey, json.dumps(existingSubscriptions))
 
     return {"message": f"Unsubscribed from ClassID {classid}"}

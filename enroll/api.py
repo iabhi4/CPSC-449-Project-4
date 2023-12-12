@@ -1,9 +1,12 @@
 import contextlib
+import json
 import requests
 import redis
 import boto3
 
 from fastapi import FastAPI, Depends, HTTPException, status, Request
+from notification.email_consumer import publish_email_notification
+from notification.webhook_consumer import publish_webhook_notification
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from botocore.exceptions import ClientError
@@ -438,7 +441,18 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
                 new_response = retrieve_enrollment_record_id(next_on_waitlist, classid)
                 new_updated_status = update_enrollment_status(new_response, new_status)
                 updated_current_enrollment = update_current_enrollment(classid, increment=True)
-            
+
+                #Logic to send notification to user
+                subscriptionKey = f"subscription:{next_on_waitlist}"
+                existingSubscriptions = r.get(subscriptionKey)
+                studentNotifDetails = json.loads(existingSubscriptions.decode('utf-8')).get(str(classid))
+                studentEmail = studentNotifDetails.get("email")
+                studentProxyURL = studentNotifDetails.get("proxy")
+                if(studentEmail is not None and studentEmail != ""):
+                    publish_email_notification(studentid, classid, studentEmail)
+                if(studentProxyURL is not None and studentProxyURL != ""):
+                    publish_webhook_notification(studentid, classid, studentProxyURL)
+
             return {
                 "message": "Class dropped updated successfully",
                 "updated_status": updated_status,
@@ -623,6 +637,17 @@ def drop_student_administratively(instructorid: int, classid: int, studentid: in
         new_response = retrieve_enrollment_record_id(next_on_waitlist, classid)
         new_updated_status = update_enrollment_status(new_response, new_status)
         updated_current_enrollment = update_current_enrollment(classid, increment=True)
+
+        #Logic to send notification to user
+        subscriptionKey = f"subscription:{next_on_waitlist}"
+        existingSubscriptions = r.get(subscriptionKey)
+        studentNotifDetails = json.loads(existingSubscriptions.decode('utf-8')).get(str(classid))
+        studentEmail = studentNotifDetails.get("email")
+        studentProxyURL = studentNotifDetails.get("proxy")
+        if(studentEmail is not None and studentEmail != ""):
+            publish_email_notification(studentid, classid, studentEmail)
+        if(studentProxyURL is not None and studentProxyURL != ""):
+            publish_webhook_notification(studentid, classid, studentProxyURL)
     return {"message": f"Student {studentid} has been administratively dropped from class {classid} by instructor {instructorid}"}
 
 
