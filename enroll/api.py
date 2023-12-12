@@ -1,9 +1,10 @@
+import time
 import contextlib
 import requests
 import redis
 import boto3
 
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from botocore.exceptions import ClientError
@@ -503,7 +504,7 @@ def remove_student_from_waitlist(studentid: int, classid: int, username: str, em
     return {"Element removed": studentid}
 
 @app.get("/waitlist/{studentid}/{classid}/{username}/{email}")
-def view_waitlist_position(studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
+def view_waitlist_position(response: Response, studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
     """API to view a student's position on the waitlist.
 
     Args:
@@ -514,6 +515,19 @@ def view_waitlist_position(studentid: int, classid: int, username: str, email: s
         A dictionary with a message indicating the student's position on the waitlist.
     """
     check_user(studentid, username, email)
+    last_modified = r.get(f"last-modified:{classid}")
+    if last_modified:
+        if if_modified_since >= float(last_modified):
+            raise HTTPException(
+                    status_code=304,
+                    detail="Resource not modified",
+            )
+            return
+    else:
+        now_gmt = time.gmttime()
+        r.set(f"last-modified:{classid}", now_gmt.timestamp())
+        response.headers["Last-Modified"] = time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt)
+
     position = r.lpos(f"waitClassID_{classid}", studentid)
     
     if position:
