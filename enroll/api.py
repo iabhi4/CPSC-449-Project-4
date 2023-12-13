@@ -531,21 +531,23 @@ def view_waitlist_position(request: Request, response: Response, studentid: int,
     """
     check_user(studentid, username, email)
 
-    if 'If-Modified-Since'.lower() in request.headers:
-        if_modified_since = request.headers['If-Modified-Since']  # Assume it's given in correct format
-        last_modified = r.get(f"last-modified:{classid}").decode()
-        if last_modified:
-            response.headers["Last-Modified"] = last_modified
+    last_modified = r.get(f"last-modified:{classid}")
+    if last_modified:
+        last_modified = last_modified.decode()
+        response.headers["Last-Modified"] = last_modified
+        if 'If-Modified-Since'.lower() in request.headers:
+            if_modified_since = request.headers['If-Modified-Since']  # Assume it's given in correct format
             print(f"{if_modified_since} >= {last_modified}")
             if if_modified_since >= last_modified:
+                response.headers["Last-Modified"] = last_modified
                 raise HTTPException(
                         status_code=304,
                         detail="Resource not modified",
                 )
-        else:
-            now_gmt = time.gmtime()
-            r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt))
-            response.headers["Last-Modified"] = time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt)
+    else:
+        now_gmt = time.gmtime()
+        r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt))
+        response.headers["Last-Modified"] = time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt)
 
     position = r.lpos(f"waitClassID_{classid}", studentid)
     
