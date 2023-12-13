@@ -1,9 +1,7 @@
-# CPSC 449 Project 3
-
-* [Project Document](https://docs.google.com/document/d/1rGKdbNxOj6FtUM_BQyWFM-yvaj4NXe5Kh3e6nWIH060/edit?usp=sharing)
+# CPSC 449 Project 4
 
 ## Project Description:
-The Polyglot Enrollment System is a backend application built upon the data given in Project 2. The project demonstrates the implementation of polyglot persistence by utilizing Redis and DynamoDB Local for managing different sets of data related to student enrollment and waitlists. This system is designed to replace a previous monolithic database approach (SQLite) with a more scalable and efficient polyglot architecture.
+Asynchronous messaging and Conditional GET
 
 ### Project Architecture
 The Polyglot Enrollment System consists of the following key components:
@@ -11,21 +9,15 @@ The Polyglot Enrollment System consists of the following key components:
 - Redis: Manages real-time student waitlists.
 - DynamoDB Local: Stores class and enrollment information.
 - API Services: Serve different functionalities like user management and class enrollment.
+- aiosmtpd: Email server
 
 ## Project Members
 
-- Edwin Peraza
-- Micah Baumann
-- Vivian Cao
 - Liam Hernandez
-- Gaurav Warad
-
-
-## GitHub Repository
-
-You can find the project's source code and documentation on our GitHub repository:
-
-[CPSC-449 Project 3 Repository](https://github.com/micahbaumann/CPSC-449-Project-3)
+- David Harboyan
+- Abhinav Singh
+- Viditi Vartak
+- Rishub Goel
 
 ## Getting started
 
@@ -38,6 +30,7 @@ You can find the project's source code and documentation on our GitHub repositor
 - Redis Server for caching and data storage
 - AWS CLI with configured dummy credentials for DynamoDB Local, for local DynamoDB management
 - Java Runtime Environment (JRE) for running DynamoDB Local
+- aiosmtpd for mail server
 
 ### Setup
 Before running the application, ensure that you have Redis and DynamoDB Local correctly installed and configured. Make sure you have Java Runtime Environment (JRE) installed on your machine as DynamoDB Local requires Java. 
@@ -48,7 +41,7 @@ Follow these steps to set up your environment and run the application:
 
 Use the following command to clone the project repository:
 ```
-git clone https://github.com/micahbaumann/CPSC-449-Project-3.git
+git clone https://github.com/iabhi4/CPSC-449-Project-4.git
 ```
 
 - Initialize the Project:
@@ -88,6 +81,7 @@ Foreman will host the processes  in the following URLs and ports:
 - `enroll.3`: [http://localhost:5302](http://localhost:5002)
 - `krakend`: [http://localhost:5400](http://localhost:5400)
 - `dynamodb_local`: [http://localhost:5500](http://localhost:5500)
+- `notification_service`: [http://localhost:5600](http://localhost:5600)
 
 ### Testing endpoints
 
