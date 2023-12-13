@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from urllib.parse import unquote
 from fastapi import Depends, FastAPI, HTTPException, Path
 import redis
@@ -16,8 +17,8 @@ def subscribe_to_notification(
     studentid: int,
     classid: int,
     username: str,
-    email: str,
-    proxyURL: str,
+    email: Optional[str] = None,
+    proxyURL: Optional[str] = None,
     r=Depends(get_redis)
 ):
     """API for students to subscribe to enrollment notifications.
@@ -44,7 +45,12 @@ def subscribe_to_notification(
             existingSubscriptions = {}
         else:
             existingSubscriptions = json.loads(existingSubscriptions)
-        existingSubscriptions[str(classid)] = {"email": email, "proxy": proxyURL}
+        if email is not None and (proxyURL is None or proxyURL == str("{proxyURL}")):
+            existingSubscriptions[str(classid)] = {"email": email}
+        elif (email is None or email == str("{email}")) and proxyURL is not None:
+            existingSubscriptions[str(classid)] = {"proxy": proxyURL}
+        else:
+            existingSubscriptions[str(classid)] = {"email": email, "proxy": proxyURL}
         r.set(subscriptionKey, json.dumps(existingSubscriptions))
 
         return {"message": f"You have subscribed to {classid}'s notification"}

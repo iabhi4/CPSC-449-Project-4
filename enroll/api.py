@@ -451,9 +451,9 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
                 studentEmail = studentNotifDetails.get("email")
                 studentProxyURL = studentNotifDetails.get("proxy")
                 if(studentEmail is not None and studentEmail != ""):
-                    publish_email_notification(studentid, classid, studentEmail)
+                    publish_email_notification(next_on_waitlist, classid, studentEmail)
                 if(studentProxyURL is not None and studentProxyURL != ""):
-                    publish_webhook_notification(studentid, classid, studentProxyURL)
+                    publish_webhook_notification(next_on_waitlist, classid, studentProxyURL)
 
             return {
                 "message": "Class dropped updated successfully",
