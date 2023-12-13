@@ -31,6 +31,8 @@ def subscribe_to_notification(
         A json with a message indicating the student's subscription status.
     """
     try:
+        if (email is None or email == str("{email}")) and (proxyURL is None or proxyURL == str("{proxyURL}")):
+            return {"message": "Please provide either email or proxy URL to proceed with subscription"}
         check_user(studentid, username, email)
         class_item = check_class_exists(classid)
         if class_item.get('State') != 'active':
@@ -41,13 +43,14 @@ def subscribe_to_notification(
 
         subscriptionKey = f"subscription:{studentid}"
         existingSubscriptions = r.get(subscriptionKey)
+        print('got exisiting subs')
         if not existingSubscriptions:
             existingSubscriptions = {}
         else:
             existingSubscriptions = json.loads(existingSubscriptions)
-        if email is not None and (proxyURL is None or proxyURL == str("{proxyURL}")):
+        if (email is not None and email != str("{email}")) and (proxyURL is None or proxyURL == str("{proxyURL}")):
             existingSubscriptions[str(classid)] = {"email": email}
-        elif (email is None or email == str("{email}")) and proxyURL is not None:
+        elif (email is None or email == str("{email}")) and (proxyURL is not None and proxyURL != str("{proxyURL}")):
             existingSubscriptions[str(classid)] = {"proxy": proxyURL}
         else:
             existingSubscriptions[str(classid)] = {"email": email, "proxy": proxyURL}
@@ -56,7 +59,7 @@ def subscribe_to_notification(
         return {"message": f"You have subscribed to {classid}'s notification"}
 
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": e}
 
 
 
