@@ -133,6 +133,9 @@
                 "endpoint": "/student/waitlist/{classid}",
                 "method": "GET",
                 "output_encoding": "no-op",
+                "input_headers": [
+                    "If-Modified-Since"
+                ],
                 "backend": [
                 {
                     "url_pattern": "/waitlist/{JWT.jti}/{classid}/{JWT.sub}/{JWT.email}",
