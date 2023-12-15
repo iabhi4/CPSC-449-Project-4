@@ -253,11 +253,13 @@ def add_to_waitlist(class_id: int, student_id: int, r):
 
     if r.llen(f"waitClassID_{class_id}") < response_class["Items"][0]["WaitlistMaximum"]:
         r.rpush(f"waitClassID_{class_id}", student_id)
+        r.set(f"last-modified:{class_id}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
         return True
     else:
         raise HTTPException(
             status_code=409,
-            detail=f"Class and Waitlist with ClassID {class_id} are full"
+            detail=
+            f"Class and Waitlist with ClassID {class_id} are full"
         )
     
 
@@ -436,6 +438,7 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
         updated_current_enrollment_int = int(updated_current_enrollment)
         if updated_current_enrollment_int:
             next_on_waitlist = r.lpop(f"waitClassID_{classid}")
+            r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
             if next_on_waitlist is not None:
                 # Convert the retrieved string to an integer
                 next_on_waitlist = int(next_on_waitlist)
@@ -470,6 +473,7 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
             status_code=500,
             detail="Failed to update enrollment status"
         )
+    
 
 @app.delete("/waitlistdrop/{studentid}/{classid}/{username}/{email}")
 def remove_student_from_waitlist(studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
@@ -645,6 +649,7 @@ def drop_student_administratively(instructorid: int, classid: int, studentid: in
         )
     # Retrieve the next student ID from the waitlist
     next_on_waitlist_str = r.lpop(f"waitClassID_{classid}")
+    r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
 
     if next_on_waitlist_str is not None:
         # Convert the retrieved string to an integer
