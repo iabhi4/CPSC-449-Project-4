@@ -31,6 +31,7 @@ You can find the project's source code and documentation on our GitHub repositor
 - Redis Server for caching and data storage
 - AWS CLI with configured dummy credentials for DynamoDB Local, for local DynamoDB management
 - Java Runtime Environment (JRE) for running DynamoDB Local
+- aiosmtpd for mail server
 
 ### Setup
 Before running the application, ensure that you have Redis and DynamoDB Local correctly installed and configured. Make sure you have Java Runtime Environment (JRE) installed on your machine as DynamoDB Local requires Java. 
@@ -41,7 +42,7 @@ Follow these steps to set up your environment and run the application:
 
 Use the following command to clone the project repository:
 ```
-git clone https://github.com/micahbaumann/CPSC-449-Project-3.git
+git clone https://github.com/iabhi4/CPSC-449-Project-4.git
 ```
 
 - Initialize the Project:
