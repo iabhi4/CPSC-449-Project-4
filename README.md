@@ -1,31 +1,24 @@
-# CPSC 449 Project 3
+# CPSC 449 Project 4
 
-* [Project Document](https://docs.google.com/document/d/1rGKdbNxOj6FtUM_BQyWFM-yvaj4NXe5Kh3e6nWIH060/edit?usp=sharing)
+* [Project Document](https://docs.google.com/document/d/1RhQux7ky1-rQ4WXQPrFzPpx-Owis7wYj63R41sp3zXo/edit)
 
 ## Project Description:
-The Polyglot Enrollment System is a backend application built upon the data given in Project 2. The project demonstrates the implementation of polyglot persistence by utilizing Redis and DynamoDB Local for managing different sets of data related to student enrollment and waitlists. This system is designed to replace a previous monolithic database approach (SQLite) with a more scalable and efficient polyglot architecture.
-
-### Project Architecture
-The Polyglot Enrollment System consists of the following key components:
-
-- Redis: Manages real-time student waitlists.
-- DynamoDB Local: Stores class and enrollment information.
-- API Services: Serve different functionalities like user management and class enrollment.
+In this project we build upon what was done in the previous projects. This project implements a new enrollment notification service where students can subscribe to notifications for a new course, list their subscriptions and unsubscribe from a course. It also demonstrates the ability to reduce the amount of traffic to the "view current waitlist" endpoint by using HTTP Conditional Requests, specifically the `Last-Modified: / If-Modified-Since:` headers.
 
 ## Project Members
 
-- Edwin Peraza
-- Micah Baumann
-- Vivian Cao
 - Liam Hernandez
-- Gaurav Warad
+- David Harboyan
+- Abhinav Singh
+- Viditi Vartak
+- Rishub Goel
 
 
 ## GitHub Repository
 
 You can find the project's source code and documentation on our GitHub repository:
 
-[CPSC-449 Project 3 Repository](https://github.com/micahbaumann/CPSC-449-Project-3)
+[CPSC-449 Project 4 Repository](https://github.com/iabhi4/CPSC-449-Project-4)
 
 ## Getting started
 
@@ -88,6 +81,7 @@ Foreman will host the processes  in the following URLs and ports:
 - `enroll.3`: [http://localhost:5302](http://localhost:5002)
 - `krakend`: [http://localhost:5400](http://localhost:5400)
 - `dynamodb_local`: [http://localhost:5500](http://localhost:5500)
+- `notification_service`: [http://localhost:5600](http://localhost:5600)
 
 ### Testing endpoints
 
