@@ -1,15 +1,9 @@
 # CPSC 449 Project 4
 
+* [Project Document](https://docs.google.com/document/d/1RhQux7ky1-rQ4WXQPrFzPpx-Owis7wYj63R41sp3zXo/edit)
+
 ## Project Description:
-Asynchronous messaging and Conditional GET
-
-### Project Architecture
-The Polyglot Enrollment System consists of the following key components:
-
-- Redis: Manages real-time student waitlists.
-- DynamoDB Local: Stores class and enrollment information.
-- API Services: Serve different functionalities like user management and class enrollment.
-- aiosmtpd: Email server
+In this project we build upon what was done in the previous projects. This project implements a new enrollment notification service where students can subscribe to notifications for a new course, list their subscriptions and unsubscribe from a course. It also demonstrates the ability to reduce the amount of traffic to the "view current waitlist" endpoint by using HTTP Conditional Requests, specifically the `Last-Modified: / If-Modified-Since:` headers.
 
 ## Project Members
 
@@ -18,6 +12,12 @@ The Polyglot Enrollment System consists of the following key components:
 - Abhinav Singh
 - Viditi Vartak
 - Rishub Goel
+
+## GitHub Repository
+
+You can find the project's source code and documentation on our GitHub repository:
+
+[CPSC-449 Project 4 Repository](https://github.com/iabhi4/CPSC-449-Project-4)
 
 ## Getting started
 

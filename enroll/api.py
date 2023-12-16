@@ -1,9 +1,13 @@
+import time
 import contextlib
+import json
 import requests
 import redis
 import boto3
 
-from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, HTTPException, status, Request, Response
+from notification.email_consumer import publish_email_notification
+from notification.webhook_consumer import publish_webhook_notification
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from botocore.exceptions import ClientError
@@ -12,7 +16,7 @@ from boto3.dynamodb.conditions import Key, Attr
 KRAKEND_PORT = "5400"
 
 # start dynamo db
-dynamo_db = boto3.resource('dynamodb', endpoint_url="http://localhost:5500")
+dynamo_db = boto3.resource('dynamodb', endpoint_url="http://localhost:5500", region_name="localhost")
 # retrieve tables
 users_table = dynamo_db.Table('Users')
 classes_table = dynamo_db.Table('Classes')
@@ -249,11 +253,13 @@ def add_to_waitlist(class_id: int, student_id: int, r):
 
     if r.llen(f"waitClassID_{class_id}") < response_class["Items"][0]["WaitlistMaximum"]:
         r.rpush(f"waitClassID_{class_id}", student_id)
+        r.set(f"last-modified:{class_id}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
         return True
     else:
         raise HTTPException(
             status_code=409,
-            detail=f"Class and Waitlist with ClassID {class_id} are full"
+            detail=
+            f"Class and Waitlist with ClassID {class_id} are full"
         )
     
 
@@ -429,8 +435,10 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
         updated_status = update_enrollment_status(response, new_status)
         # Decrement the CurrentEnrollment for the class
         updated_current_enrollment = update_current_enrollment(classid, increment=False)
-        if updated_current_enrollment:
+        updated_current_enrollment_int = int(updated_current_enrollment)
+        if updated_current_enrollment_int:
             next_on_waitlist = r.lpop(f"waitClassID_{classid}")
+            r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
             if next_on_waitlist is not None:
                 # Convert the retrieved string to an integer
                 next_on_waitlist = int(next_on_waitlist)
@@ -438,7 +446,18 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
                 new_response = retrieve_enrollment_record_id(next_on_waitlist, classid)
                 new_updated_status = update_enrollment_status(new_response, new_status)
                 updated_current_enrollment = update_current_enrollment(classid, increment=True)
-            
+
+                #Logic to send notification to user
+                subscriptionKey = f"subscription:{next_on_waitlist}"
+                existingSubscriptions = r.get(subscriptionKey)
+                studentNotifDetails = json.loads(existingSubscriptions.decode('utf-8')).get(str(classid))
+                studentEmail = studentNotifDetails.get("email")
+                studentProxyURL = studentNotifDetails.get("proxy")
+                if(studentEmail is not None and studentEmail != ""):
+                    publish_email_notification(next_on_waitlist, classid, studentEmail)
+                if(studentProxyURL is not None and studentProxyURL != ""):
+                    publish_webhook_notification(next_on_waitlist, classid, studentProxyURL)
+
             return {
                 "message": "Class dropped updated successfully",
                 "updated_status": updated_status,
@@ -454,6 +473,7 @@ def drop_student_from_class(studentid: int, classid: int, username: str, email: 
             status_code=500,
             detail="Failed to update enrollment status"
         )
+    
 
 @app.delete("/waitlistdrop/{studentid}/{classid}/{username}/{email}")
 def remove_student_from_waitlist(studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
@@ -503,7 +523,7 @@ def remove_student_from_waitlist(studentid: int, classid: int, username: str, em
     return {"Element removed": studentid}
 
 @app.get("/waitlist/{studentid}/{classid}/{username}/{email}")
-def view_waitlist_position(studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
+def view_waitlist_position(request: Request, response: Response, studentid: int, classid: int, username: str, email: str, r = Depends(get_redis)):
     """API to view a student's position on the waitlist.
 
     Args:
@@ -514,9 +534,26 @@ def view_waitlist_position(studentid: int, classid: int, username: str, email: s
         A dictionary with a message indicating the student's position on the waitlist.
     """
     check_user(studentid, username, email)
+
+    last_modified = r.get(f"last-modified:{classid}")
+    if last_modified:
+        last_modified = last_modified.decode()
+        response.headers["Last-Modified"] = last_modified
+        if 'If-Modified-Since'.lower() in request.headers:
+            if_modified_since = request.headers['If-Modified-Since']
+            print(f"{if_modified_since} >= {last_modified}")
+            if if_modified_since >= last_modified:
+                response.headers["Last-Modified"] = last_modified
+                response.status_code = status.HTTP_304_NOT_MODIFIED
+                return
+    else:
+        now_gmt = time.gmtime()
+        r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt))
+        response.headers["Last-Modified"] = time.strftime('%a, %d %b %Y %H:%M:%S GMT', now_gmt)
+
     position = r.lpos(f"waitClassID_{classid}", studentid)
     
-    if position:
+    if position is not None:
         message = f"Student {studentid} is on the waitlist for class {classid} in position"
     else:
         message = f"Student {studentid} is not on the waitlist for class {classid}"
@@ -613,6 +650,7 @@ def drop_student_administratively(instructorid: int, classid: int, studentid: in
         )
     # Retrieve the next student ID from the waitlist
     next_on_waitlist_str = r.lpop(f"waitClassID_{classid}")
+    r.set(f"last-modified:{classid}", time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime()))
 
     if next_on_waitlist_str is not None:
         # Convert the retrieved string to an integer
@@ -623,6 +661,17 @@ def drop_student_administratively(instructorid: int, classid: int, studentid: in
         new_response = retrieve_enrollment_record_id(next_on_waitlist, classid)
         new_updated_status = update_enrollment_status(new_response, new_status)
         updated_current_enrollment = update_current_enrollment(classid, increment=True)
+
+        #Logic to send notification to user
+        subscriptionKey = f"subscription:{next_on_waitlist}"
+        existingSubscriptions = r.get(subscriptionKey)
+        studentNotifDetails = json.loads(existingSubscriptions.decode('utf-8')).get(str(classid))
+        studentEmail = studentNotifDetails.get("email")
+        studentProxyURL = studentNotifDetails.get("proxy")
+        if(studentEmail is not None and studentEmail != ""):
+            publish_email_notification(studentid, classid, studentEmail)
+        if(studentProxyURL is not None and studentProxyURL != ""):
+            publish_webhook_notification(studentid, classid, studentProxyURL)
     return {"message": f"Student {studentid} has been administratively dropped from class {classid} by instructor {instructorid}"}
 
 
