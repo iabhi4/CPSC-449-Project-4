@@ -13,7 +13,6 @@ In this project we build upon what was done in the previous projects. This proje
 - Viditi Vartak
 - Rishub Goel
 
-
 ## GitHub Repository
 
 You can find the project's source code and documentation on our GitHub repository:
