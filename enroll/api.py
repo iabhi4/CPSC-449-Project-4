@@ -535,8 +535,9 @@ def view_waitlist_position(request: Request, response: Response, studentid: int,
     """
     check_user(studentid, username, email)
 
-    last_modified = r.get(f"last-modified:{classid}").decode()
+    last_modified = r.get(f"last-modified:{classid}")
     if last_modified:
+        last_modified = last_modified.decode()
         response.headers["Last-Modified"] = last_modified
         if 'If-Modified-Since'.lower() in request.headers:
             if_modified_since = request.headers['If-Modified-Since']
